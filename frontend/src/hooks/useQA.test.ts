@@ -52,13 +52,23 @@ describe('useQA Hook', () => {
 
     const { result } = renderHook(() => useQA());
 
-    await expect(
-      act(async () => {
+    // Call askQuestion - the hook catches and sets error state
+    let errorThrown = false;
+    await act(async () => {
+      try {
         await result.current.askQuestion({ question: 'Test question?' });
-      })
-    ).rejects.toThrow('No manuals uploaded');
+      } catch (error) {
+        errorThrown = true;
+        expect((error as Error).message).toBe('No manuals uploaded');
+      }
+    });
 
+    // Error should have been thrown
+    expect(errorThrown).toBe(true);
+
+    // Error state should be set after act completes
     expect(result.current.error).toBe('No manuals uploaded');
+    expect(result.current.loading).toBe(false);
   });
 
   it('should clear conversation history', async () => {
