@@ -106,7 +106,15 @@ def test_directories():
     """Test that required directories exist"""
     print("\nTesting directories...")
 
-    required_dirs = ['src', 'src/pdf_processor', 'src/vector_db', 'src/rag_pipeline', 'src/ui']
+    required_dirs = [
+        'backend',
+        'backend/app',
+        'backend/app/services',
+        'backend/app/services/pdf_processor',
+        'backend/app/services/vector_db',
+        'backend/app/services/rag_pipeline',
+        'frontend'
+    ]
 
     for dir_path in required_dirs:
         if os.path.exists(dir_path):
@@ -119,34 +127,47 @@ def test_directories():
 
 def test_modules():
     """Test that our modules can be imported"""
-    print("\nTesting custom modules...")
+    print("\nTesting backend modules...")
+
+    # Add backend to path for imports
+    import sys
+    backend_path = os.path.join(os.path.dirname(__file__), 'backend')
+    if backend_path not in sys.path:
+        sys.path.insert(0, backend_path)
 
     try:
-        from src.pdf_processor.pdf_extractor import PDFExtractor
+        from app.services.pdf_processor.pdf_extractor import PDFExtractor
         print("✅ PDF Extractor")
     except ImportError as e:
         print(f"❌ PDF Extractor: {e}")
         return False
 
     try:
-        from src.vector_db.chroma_manager import ChromaManager
+        from app.services.vector_db.chroma_manager import ChromaManager
         print("✅ Chroma Manager")
     except ImportError as e:
         print(f"❌ Chroma Manager: {e}")
         return False
 
     try:
-        from src.rag_pipeline.qa_system import MusicalInstrumentQA
+        from app.services.rag_pipeline.qa_system import MusicalInstrumentQA
         print("✅ QA System")
     except ImportError as e:
         print(f"❌ QA System: {e}")
         return False
 
     try:
-        from src.ui.main_interface import ManualQAInterface
-        print("✅ Main Interface")
+        from app.core.config import settings
+        print("✅ Configuration")
     except ImportError as e:
-        print(f"❌ Main Interface: {e}")
+        print(f"❌ Configuration: {e}")
+        return False
+
+    try:
+        from app.main import app
+        print("✅ FastAPI Application")
+    except ImportError as e:
+        print(f"❌ FastAPI Application: {e}")
         return False
 
     return True
@@ -171,8 +192,10 @@ def main():
 
     if all_passed:
         print("🎉 All tests passed! Your setup is ready.")
-        print("Run the application with: poetry run streamlit run app.py")
-        print("Or use the quick start script: ./run.sh")
+        print("\nTo start the application:")
+        print("  Backend:  cd backend && poetry run python -m app.main")
+        print("  Frontend: cd frontend && npm run dev")
+        print("\nThen open http://localhost:5173 in your browser")
     else:
         print("❌ Some tests failed. Please fix the issues above.")
         print("Try running: poetry install")

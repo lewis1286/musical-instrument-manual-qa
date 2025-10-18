@@ -1,1 +1,0 @@
-# RAG pipeline module for question answering over musical instrument manuals
