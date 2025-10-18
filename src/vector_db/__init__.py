@@ -1,0 +1,1 @@
+# Vector database module for storing and retrieving manual chunks
