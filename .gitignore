@@ -89,7 +89,6 @@ logs/
 # Application specific
 uploaded_manuals/
 manual_chunks/
-vector_db/
 
 # Streamlit
 .streamlit/

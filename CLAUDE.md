@@ -1,6 +1,6 @@
 # Musical Instrument Manual Q&A System
 
-A RAG-powered Q&A system for musical instrument manuals using ChromaDB, OpenAI, and Streamlit.
+A RAG-powered Q&A system for musical instrument manuals with a React frontend and FastAPI backend.
 
 ## 🎯 Project Overview
 
@@ -9,104 +9,188 @@ This application allows musicians and audio engineers to upload PDF manuals for 
 ## 🏗️ Architecture
 
 ```
-📁 src/
-├── 📁 pdf_processor/     # PDF text extraction and chunking
-├── 📁 vector_db/        # ChromaDB vector database management
-├── 📁 rag_pipeline/     # Q&A system with LangChain + OpenAI
-└── 📁 ui/              # Streamlit web interface
+📁 backend/
+└── 📁 app/
+    ├── 📁 api/
+    │   ├── 📁 routes/        # API endpoints (manuals, qa, stats)
+    │   └── 📁 models/        # Pydantic schemas
+    ├── 📁 core/             # Configuration and dependencies
+    ├── 📁 services/
+    │   ├── 📁 pdf_processor/    # PDF text extraction and chunking
+    │   ├── 📁 vector_db/        # ChromaDB vector database management
+    │   └── 📁 rag_pipeline/     # Q&A system with LangChain + OpenAI
+    └── 📄 main.py           # FastAPI application entry point
 
-📄 app.py               # Main application entry point
-📄 pyproject.toml       # Poetry dependencies and configuration
-📄 test_setup.py        # Setup verification script
+📁 frontend/
+└── 📁 src/
+    ├── 📄 App.tsx           # React application
+    └── 📄 main.tsx          # Application entry point
+
+📄 pyproject.toml        # Poetry dependencies and configuration
+📄 test_setup.py         # Setup verification script
 ```
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- **Python 3.11+** with Poetry for backend dependencies
+- **Node.js 18+** with npm for frontend dependencies
+
+### Setup
 
 1. **Install Poetry** (if not already installed):
    ```bash
    curl -sSL https://install.python-poetry.org | python3 -
    ```
 
-2. **Install dependencies**:
+2. **Install backend dependencies**:
    ```bash
    poetry install
    ```
 
-3. **Set up environment**:
+3. **Install frontend dependencies**:
+   ```bash
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+4. **Set up environment**:
    ```bash
    cp .env.template .env
    # Edit .env and add your OPENAI_API_KEY
    ```
 
-4. **Test setup**:
+5. **Test setup** (optional):
    ```bash
    poetry run python test_setup.py
    ```
 
-5. **Run application**:
-   ```bash
-   poetry run streamlit run app.py
-   # Or use the convenience script:
-   ./run.sh
-   ```
+### Running the Application
+
+You need to run **both** the backend and frontend servers:
+
+#### Option 1: Run both servers separately
+
+**Terminal 1 - Backend (FastAPI)**:
+```bash
+cd backend
+poetry run python -m app.main
+# Backend runs on http://localhost:8000
+```
+
+**Terminal 2 - Frontend (React + Vite)**:
+```bash
+cd frontend
+npm run dev
+# Frontend runs on http://localhost:5173
+```
+
+#### Option 2: Use the startup script (coming soon)
+```bash
+./run.sh  # Will start both servers
+```
+
+Then open your browser to **http://localhost:5173** to use the application.
 
 ## 🔧 Development Commands
 
-### Testing and Quality
+### Backend Commands
+
 ```bash
 # Run setup verification
 poetry run python test_setup.py
 
+# Start backend server (development mode with auto-reload)
+cd backend
+poetry run python -m app.main
+# Or with uvicorn directly:
+poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
 # Code formatting
-poetry run black src/
-poetry run isort src/
+poetry run black backend/
+poetry run isort backend/
 
 # Type checking
-poetry run mypy src/
+poetry run mypy backend/
 
 # Linting
-poetry run flake8 src/
+poetry run flake8 backend/
+
+# View API documentation
+# Start the backend, then visit:
+# http://localhost:8000/docs (Swagger UI)
+# http://localhost:8000/redoc (ReDoc)
 ```
 
-### Application Management
+### Frontend Commands
+
 ```bash
-# Start application
-poetry run streamlit run app.py
+cd frontend
 
-# Start with custom port
-poetry run streamlit run app.py --server.port 8501
+# Start development server (with hot reload)
+npm run dev
 
-# Development mode (auto-reload)
-poetry run streamlit run app.py --server.runOnSave true
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Linting
+npm run lint
 ```
 
 ## 📁 Project Structure
 
-### Core Components
+### Backend Components (`backend/app/`)
 
-- **PDF Processor** (`src/pdf_processor/`):
-  - Extracts text from PDFs using PyMuPDF and PyPDF2
-  - Intelligent chunking with overlap for better context
-  - Metadata extraction (manufacturer, model, instrument type)
-  - Section classification (specs, connections, operation, etc.)
+- **API Routes** (`api/routes/`):
+  - `manuals.py`: Manual upload, processing, save, list, delete endpoints
+  - `qa.py`: Question answering, suggestions, conversation history
+  - `stats.py`: Database statistics, filters, database reset
 
-- **Vector Database** (`src/vector_db/`):
-  - ChromaDB integration for semantic search
-  - Hybrid search (semantic + keyword matching)
-  - Metadata filtering by manufacturer, type, etc.
-  - Database reset and management functions
+- **Services** (`services/`):
+  - **PDF Processor** (`pdf_processor/`):
+    - Extracts text from PDFs using PyMuPDF and PyPDF2
+    - Intelligent chunking with overlap for better context
+    - Metadata extraction (manufacturer, model, instrument type)
+    - Section classification (specs, connections, operation, etc.)
 
-- **RAG Pipeline** (`src/rag_pipeline/`):
-  - LangChain integration with OpenAI
-  - Context-aware Q&A with conversation memory
-  - Source citation with page references
-  - Musical instrument domain expertise
+  - **Vector Database** (`vector_db/`):
+    - ChromaDB integration for semantic search
+    - Hybrid search (semantic + keyword matching)
+    - Metadata filtering by manufacturer, type, etc.
+    - Database reset and management functions
 
-- **UI Interface** (`src/ui/`):
-  - Streamlit web application
+  - **RAG Pipeline** (`rag_pipeline/`):
+    - LangChain integration with OpenAI
+    - Context-aware Q&A with conversation memory
+    - Source citation with page references
+    - Musical instrument domain expertise
+
+- **Core** (`core/`):
+  - `config.py`: Configuration management
+  - `dependencies.py`: Dependency injection for FastAPI
+
+- **Main** (`main.py`):
+  - FastAPI application with CORS configuration
+  - API documentation at `/docs` and `/redoc`
+  - Health check endpoint at `/health`
+
+### Frontend Components (`frontend/src/`)
+
+- **React Application** (`App.tsx`):
+  - Modern React 18+ with TypeScript
+  - Vite for fast development and builds
+  - Tailwind CSS for styling
+  - Axios for API communication
+
+- **Features**:
   - Two-stage upload with metadata editing
   - Real-time Q&A with source display
-  - Manual management and database statistics
+  - Manual management interface
+  - Database statistics and filters
 
 ### Key Features
 
@@ -250,6 +334,35 @@ This project was created with Claude Code assistance and follows best practices 
 
 ---
 
+## 🌐 API Endpoints
+
+The FastAPI backend provides the following REST API endpoints:
+
+### Manuals
+- `POST /api/manuals/process` - Upload and process PDF (Stage 1)
+- `POST /api/manuals/save` - Save manual with metadata (Stage 2)
+- `GET /api/manuals/` - List all manuals
+- `DELETE /api/manuals/{filename}` - Delete a manual
+- `POST /api/manuals/cancel/{filename}` - Cancel pending upload
+
+### Q&A
+- `POST /api/qa/ask` - Ask a question
+- `POST /api/qa/suggestions` - Get suggested questions
+- `GET /api/qa/history` - Get conversation history
+- `DELETE /api/qa/history` - Clear conversation history
+
+### Statistics & Filters
+- `GET /api/stats` - Get database statistics
+- `POST /api/database/reset` - Reset entire database
+- `GET /api/filters/manufacturers` - Get unique manufacturers
+- `GET /api/filters/instrument-types` - Get unique instrument types
+
+### System
+- `GET /` - API information
+- `GET /health` - Health check
+- `GET /docs` - Swagger UI documentation
+- `GET /redoc` - ReDoc documentation
+
 ## 🤖 Claude Code Integration
 
 This project is optimized for Claude Code development:
@@ -260,11 +373,17 @@ This project is optimized for Claude Code development:
 # Quick setup verification
 poetry run python test_setup.py
 
-# Start development server
-poetry run streamlit run app.py
+# Start backend development server
+cd backend && poetry run python -m app.main
 
-# Format and check code
-poetry run black src/ && poetry run isort src/ && poetry run mypy src/
+# Start frontend development server
+cd frontend && npm run dev
+
+# Format and check backend code
+poetry run black backend/ && poetry run isort backend/ && poetry run mypy backend/
+
+# Lint frontend code
+cd frontend && npm run lint
 ```
 
 ### Project Conventions
