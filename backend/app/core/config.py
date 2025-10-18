@@ -14,9 +14,13 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     api_prefix: str = "/api"
 
-    # OpenAI Settings
+    # Anthropic Settings (for LLM)
+    anthropic_api_key: Optional[str] = None
+    anthropic_model: str = "claude-sonnet-3-5-20241022"
+
+    # OpenAI Settings (for embeddings)
     openai_api_key: Optional[str] = None
-    openai_model: str = "gpt-3.5-turbo"
+    openai_embedding_model: str = "text-embedding-ada-002"
 
     # ChromaDB Settings
     chroma_db_path: str = "./chroma_db"

@@ -32,10 +32,10 @@ def get_qa_system() -> Optional[MusicalInstrumentQA]:
             chroma_manager = get_chroma_manager()
             _qa_system = MusicalInstrumentQA(
                 chroma_manager=chroma_manager,
-                model_name=settings.openai_model
+                model_name=settings.anthropic_model
             )
         except ValueError as e:
-            # OpenAI API key not configured
+            # Anthropic API key not configured
             print(f"QA System initialization failed: {e}")
             return None
     return _qa_system

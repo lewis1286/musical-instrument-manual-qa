@@ -48,10 +48,10 @@ class ManualQAInterface:
         """Render the sidebar with manual management"""
         st.sidebar.header("📚 Manual Management")
 
-        # Check if OpenAI API key is configured
+        # Check if Anthropic API key is configured
         if st.session_state.qa_system is None:
-            st.sidebar.error("⚠️ OpenAI API key not configured")
-            st.sidebar.info("Please set your OPENAI_API_KEY in the .env file")
+            st.sidebar.error("⚠️ Anthropic API key not configured")
+            st.sidebar.info("Please set your ANTHROPIC_API_KEY in the .env file")
             return
 
         # Upload new manual
@@ -359,8 +359,8 @@ class ManualQAInterface:
     def render_main_content(self):
         """Render the main Q&A interface"""
         if st.session_state.qa_system is None:
-            st.error("⚠️ OpenAI API key not configured. Please set OPENAI_API_KEY in your .env file.")
-            st.info("Copy .env.template to .env and add your OpenAI API key.")
+            st.error("⚠️ Anthropic API key not configured. Please set ANTHROPIC_API_KEY in your .env file.")
+            st.info("Copy .env.template to .env and add your Anthropic API key.")
             return
 
         # Quick start guide

@@ -30,7 +30,7 @@ async def ask_question(
     if qa_system is None:
         raise HTTPException(
             status_code=503,
-            detail="QA system not available. Please check OpenAI API key configuration.",
+            detail="QA system not available. Please check Anthropic API key configuration.",
         )
 
     try:

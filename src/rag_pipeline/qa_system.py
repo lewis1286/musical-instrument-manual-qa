@@ -2,7 +2,7 @@ import os
 import re
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
-from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
@@ -21,19 +21,19 @@ class QAResponse:
 class MusicalInstrumentQA:
     """RAG-based QA system for musical instrument manuals"""
 
-    def __init__(self, chroma_manager: ChromaManager, model_name: str = "gpt-3.5-turbo"):
+    def __init__(self, chroma_manager: ChromaManager, model_name: str = "claude-sonnet-3-5-20241022"):
         self.chroma_manager = chroma_manager
         self.model_name = model_name
 
         # Initialize language model
-        if os.getenv("OPENAI_API_KEY"):
-            self.llm = ChatOpenAI(
-                model_name=model_name,
+        if os.getenv("ANTHROPIC_API_KEY"):
+            self.llm = ChatAnthropic(
+                model=model_name,
                 temperature=0.1,
                 max_tokens=1000
             )
         else:
-            raise ValueError("OpenAI API key not found. Please set OPENAI_API_KEY environment variable.")
+            raise ValueError("Anthropic API key not found. Please set ANTHROPIC_API_KEY environment variable.")
 
         # Initialize conversation memory
         self.memory = ConversationBufferMemory(

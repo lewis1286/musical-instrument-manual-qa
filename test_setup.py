@@ -78,7 +78,7 @@ def test_environment():
     if not os.path.exists('.env'):
         print("⚠️  .env file not found")
         if os.path.exists('.env.template'):
-            print("   Copy .env.template to .env and add your OpenAI API key")
+            print("   Copy .env.template to .env and add your Anthropic API key")
         return False
     else:
         print("✅ .env file exists")
@@ -87,12 +87,18 @@ def test_environment():
     from dotenv import load_dotenv
     load_dotenv()
 
-    # Check OpenAI API key
-    if os.getenv('OPENAI_API_KEY'):
-        print("✅ OpenAI API key configured")
+    # Check Anthropic API key (required for LLM)
+    if os.getenv('ANTHROPIC_API_KEY'):
+        print("✅ Anthropic API key configured")
     else:
-        print("❌ OpenAI API key not found in .env file")
+        print("❌ Anthropic API key not found in .env file")
         return False
+
+    # Check OpenAI API key (optional, for embeddings)
+    if os.getenv('OPENAI_API_KEY'):
+        print("✅ OpenAI API key configured (for embeddings)")
+    else:
+        print("⚠️  OpenAI API key not found - will use local embeddings")
 
     return True
 
