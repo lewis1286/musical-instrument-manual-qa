@@ -32,8 +32,8 @@ def pdf_extractor() -> PDFExtractor:
 
 @pytest.fixture
 def temp_pdf_file() -> Generator[Path, None, None]:
-    """Create a temporary PDF file for testing"""
-    # Create a minimal PDF content (this is a very basic PDF structure)
+    """Create a temporary PDF file for testing with realistic content"""
+    # Create a minimal PDF with enough content to generate chunks
     pdf_content = b"""%PDF-1.4
 1 0 obj
 <<
@@ -67,13 +67,33 @@ endobj
 endobj
 4 0 obj
 <<
-/Length 55
+/Length 550
 >>
 stream
 BT
-/F1 24 Tf
-100 700 Td
+/F1 12 Tf
+50 750 Td
 (Moog Minimoog Manual) Tj
+0 -20 Td
+(SPECIFICATIONS) Tj
+0 -20 Td
+(This is a test manual for the Moog Minimoog synthesizer.) Tj
+0 -20 Td
+(The Minimoog is a monophonic analog synthesizer with three oscillators.) Tj
+0 -20 Td
+(It features a 24dB per octave ladder filter and ADSR envelope generators.) Tj
+0 -20 Td
+(Power consumption: 25 watts. Dimensions: 19.5 x 8.5 x 3.5 inches.) Tj
+0 -20 Td
+(Weight: 12 pounds. Output impedance: 10K ohms.) Tj
+0 -20 Td
+(Frequency range: 20Hz to 20kHz. Signal-to-noise ratio: 90dB.) Tj
+0 -20 Td
+(CONNECTIONS) Tj
+0 -20 Td
+(The audio output is a 1/4 inch jack on the rear panel.) Tj
+0 -20 Td
+(CV and Gate inputs allow external control of pitch and triggering.) Tj
 ET
 endstream
 endobj
@@ -90,7 +110,7 @@ trailer
 /Root 1 0 R
 >>
 startxref
-470
+965
 %%EOF"""
 
     with tempfile.NamedTemporaryFile(mode='wb', suffix='.pdf', delete=False) as f:
