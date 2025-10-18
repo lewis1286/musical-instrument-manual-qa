@@ -7,7 +7,7 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from sentence_transformers import SentenceTransformer
 
-from src.pdf_processor.pdf_extractor import DocumentChunk, ManualMetadata
+from app.services.pdf_processor.pdf_extractor import DocumentChunk, ManualMetadata
 
 class ChromaManager:
     """Manages ChromaDB vector database for musical instrument manuals"""

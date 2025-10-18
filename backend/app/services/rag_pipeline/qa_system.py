@@ -8,7 +8,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 from langchain.memory import ConversationBufferMemory
 
-from src.vector_db.chroma_manager import ChromaManager
+from app.services.vector_db.chroma_manager import ChromaManager
 
 @dataclass
 class QAResponse:
