@@ -176,6 +176,43 @@ npm run preview
 npm run lint
 ```
 
+## Testing
+
+The project has comprehensive test coverage for both backend and frontend.
+
+### Backend Tests (pytest)
+
+```bash
+# Run all tests
+poetry run pytest
+
+# Run with coverage
+poetry run pytest --cov=app --cov-report=html
+
+# Run only unit tests
+poetry run pytest -m unit
+
+# Run specific test file
+poetry run pytest backend/tests/test_pdf_extractor.py
+```
+
+### Frontend Tests (Vitest)
+
+```bash
+cd frontend
+
+# Run all tests
+npm test
+
+# Run with UI
+npm test:ui
+
+# Run with coverage
+npm test:coverage
+```
+
+**For detailed testing documentation, see [TESTING.md](./TESTING.md)**
+
 ## Troubleshooting
 
 ### Backend Issues
