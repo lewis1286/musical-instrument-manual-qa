@@ -55,6 +55,8 @@ export const useStats = () => {
     stats,
     loading,
     error,
+    manufacturers: stats.manufacturers,
+    instrumentTypes: stats.instrument_types,
     reloadStats: loadStats,
     resetDatabase,
   };

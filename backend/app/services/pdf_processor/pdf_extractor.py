@@ -79,9 +79,9 @@ class PDFExtractor:
 
         return pages_text
 
-    def extract_metadata(self, pdf_path: str, text_content: str) -> ManualMetadata:
+    def extract_metadata(self, pdf_path: str, text_content: str, original_filename: Optional[str] = None) -> ManualMetadata:
         """Extract metadata from PDF and text content"""
-        filename = Path(pdf_path).name
+        filename = original_filename if original_filename else Path(pdf_path).name
 
         # Try to identify manufacturer and model from filename and text
         manufacturer = self._extract_manufacturer(filename, text_content)
@@ -261,7 +261,7 @@ class PDFExtractor:
         return chunks
 
     def process_manual(self, pdf_path: str, max_chunk_size: int = 1000,
-                      overlap: int = 200) -> Tuple[List[DocumentChunk], ManualMetadata]:
+                      overlap: int = 200, original_filename: Optional[str] = None) -> Tuple[List[DocumentChunk], ManualMetadata]:
         """Process a complete manual PDF"""
         print(f"Processing manual: {pdf_path}")
 
@@ -275,7 +275,7 @@ class PDFExtractor:
         full_text = " ".join([text for text, _ in pages_text])
 
         # Extract metadata
-        metadata = self.extract_metadata(pdf_path, full_text)
+        metadata = self.extract_metadata(pdf_path, full_text, original_filename)
 
         # Create chunks
         chunks = self.chunk_text(pages_text, metadata, max_chunk_size, overlap)

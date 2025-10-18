@@ -343,7 +343,11 @@ function App() {
                           </div>
                         </div>
                         <button
-                          onClick={() => deleteManual(manual.filename)}
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete "${manual.display_name}"? This cannot be undone.`)) {
+                              deleteManual(manual.filename);
+                            }
+                          }}
                           className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 flex items-center gap-2 transition-colors"
                         >
                           <FaTrash /> Delete

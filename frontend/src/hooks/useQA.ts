@@ -68,6 +68,8 @@ export const useQA = () => {
   }, []);
 
   return {
+    answer: currentAnswer?.answer || '',
+    sources: currentAnswer?.sources || [],
     currentAnswer,
     conversation,
     suggestions,
@@ -75,6 +77,6 @@ export const useQA = () => {
     error,
     askQuestion,
     loadSuggestions,
-    clearConversation,
+    clearHistory: clearConversation,
   };
 };

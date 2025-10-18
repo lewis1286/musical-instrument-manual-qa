@@ -46,8 +46,8 @@ async def process_manual(
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
 
-        # Process the PDF
-        chunks, metadata = pdf_extractor.process_manual(tmp_file_path)
+        # Process the PDF with original filename for better metadata extraction
+        chunks, metadata = pdf_extractor.process_manual(tmp_file_path, original_filename=file.filename)
 
         # Create pending manual object
         pending = PendingManual(
