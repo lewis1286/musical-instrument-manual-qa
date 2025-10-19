@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 import { FaUpload, FaTrash, FaBook, FaChartBar, FaRedo } from 'react-icons/fa';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useManuals } from './hooks/useManuals';
 import { useQA } from './hooks/useQA';
 import { useStats } from './hooks/useStats';
@@ -177,8 +179,10 @@ function App() {
             {answer && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-bold mb-4 text-gray-800">Answer:</h2>
-                <div className="prose max-w-none mb-6">
-                  <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{answer}</p>
+                <div className="prose prose-blue max-w-none mb-6 text-gray-700 leading-relaxed">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {answer}
+                  </ReactMarkdown>
                 </div>
 
                 {/* Sources */}
