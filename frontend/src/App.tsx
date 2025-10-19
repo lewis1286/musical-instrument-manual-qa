@@ -266,8 +266,13 @@ function App() {
                     <input
                       type="text"
                       value={editMetadata.display_name}
-                      onChange={(e) => setEditMetadata({ ...editMetadata, display_name: e.target.value })}
+                      onChange={(e) => setEditMetadata({
+                        ...editMetadata,
+                        display_name: e.target.value,
+                        model: e.target.value // Auto-sync model with display name
+                      })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="e.g., Disting EX"
                     />
                   </div>
                   <div>
@@ -277,17 +282,7 @@ function App() {
                       value={editMetadata.manufacturer}
                       onChange={(e) => setEditMetadata({ ...editMetadata, manufacturer: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., Moog, Roland, Korg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-1 text-gray-700">Model</label>
-                    <input
-                      type="text"
-                      value={editMetadata.model}
-                      onChange={(e) => setEditMetadata({ ...editMetadata, model: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="e.g., Minimoog, Jupiter-8"
+                      placeholder="e.g., Moog, Roland, Expert Sleepers"
                     />
                   </div>
                   <div>

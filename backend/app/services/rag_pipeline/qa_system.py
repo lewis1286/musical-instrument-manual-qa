@@ -9,6 +9,7 @@ from langchain.chains import RetrievalQA
 from langchain.memory import ConversationBufferMemory
 
 from app.services.vector_db.chroma_manager import ChromaManager
+from app.core.config import settings
 
 @dataclass
 class QAResponse:
@@ -21,7 +22,7 @@ class QAResponse:
 class MusicalInstrumentQA:
     """RAG-based QA system for musical instrument manuals"""
 
-    def __init__(self, chroma_manager: ChromaManager, model_name: str = "claude-sonnet-3-5-20241022"):
+    def __init__(self, chroma_manager: ChromaManager, model_name: str = settings.anthropic_model):
         self.chroma_manager = chroma_manager
         self.model_name = model_name
 

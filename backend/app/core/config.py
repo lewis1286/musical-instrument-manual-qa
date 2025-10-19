@@ -2,8 +2,16 @@
 Application configuration
 """
 import os
+from pathlib import Path
 from typing import Optional
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+# Load .env file from project root (two levels up from this file)
+# backend/app/core/config.py -> backend/app -> backend -> project_root
+project_root = Path(__file__).parent.parent.parent.parent
+env_file_path = project_root / ".env"
+load_dotenv(dotenv_path=env_file_path)
 
 
 class Settings(BaseSettings):
@@ -16,7 +24,7 @@ class Settings(BaseSettings):
 
     # Anthropic Settings (for LLM)
     anthropic_api_key: Optional[str] = None
-    anthropic_model: str = "claude-sonnet-3-5-20241022"
+    anthropic_model: str = "claude-haiku-4-5-20251001"
 
     # OpenAI Settings (for embeddings)
     openai_api_key: Optional[str] = None
