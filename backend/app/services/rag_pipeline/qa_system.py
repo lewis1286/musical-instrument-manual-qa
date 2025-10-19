@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from langchain_anthropic import ChatAnthropic
@@ -10,6 +11,9 @@ from langchain.memory import ConversationBufferMemory
 
 from app.services.vector_db.chroma_manager import ChromaManager
 from app.core.config import settings
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 @dataclass
 class QAResponse:
@@ -111,12 +115,21 @@ Answer based on the manual content provided:"""
     def answer_question(self, query: str, max_sources: int = 5,
                        include_conversation: bool = True) -> QAResponse:
         """Answer a question using the RAG pipeline"""
+        logger.info("")
+        logger.info("="*80)
+        logger.info("🤖 RAG PIPELINE: QUESTION ANSWERING")
+        logger.info("="*80)
+        logger.info(f"❓ User question: {query}")
 
         # Extract keywords and filters
         keywords = self._extract_keywords(query)
         filters = self._parse_query_filters(query)
 
+        logger.info(f"🔑 Extracted keywords: {keywords}")
+        logger.info(f"🎛️  Parsed filters: {filters}")
+
         # Retrieve relevant chunks
+        logger.info(f"📚 Retrieving up to {max_sources} relevant chunks...")
         relevant_chunks = self.chroma_manager.hybrid_search(
             query=query,
             keywords=keywords,
@@ -125,22 +138,28 @@ Answer based on the manual content provided:"""
         )
 
         if not relevant_chunks:
+            logger.warning("⚠️  No relevant chunks found for the query!")
             return QAResponse(
                 answer="I couldn't find relevant information in the uploaded manuals. Please make sure you've uploaded the manual for the instrument you're asking about.",
                 sources=[],
                 query=query
             )
 
+        logger.info(f"✅ Retrieved {len(relevant_chunks)} chunks")
+
         # Prepare context for the LLM
         context_parts = []
         sources = []
 
+        logger.info("📦 Preparing context for LLM...")
         for i, chunk in enumerate(relevant_chunks):
             metadata = chunk["metadata"]
             display_name = metadata.get("display_name", metadata["filename"])
             source_info = f"[Source {i+1}: {display_name}, Page {metadata['page_number']}]"
 
             context_parts.append(f"{source_info}\n{chunk['content']}")
+
+            logger.info(f"   Source {i+1}: {display_name} (Page {metadata['page_number']}) - {len(chunk['content'])} chars")
 
             sources.append({
                 "filename": metadata["filename"],
@@ -154,6 +173,7 @@ Answer based on the manual content provided:"""
             })
 
         context = "\n\n".join(context_parts)
+        logger.info(f"📝 Total context length: {len(context)} characters")
 
         # Include conversation history if requested
         conversation_context = ""
@@ -162,12 +182,18 @@ Answer based on the manual content provided:"""
             for message in self.memory.chat_memory.messages[-4:]:  # Last 2 exchanges
                 if hasattr(message, 'content'):
                     conversation_context += f"{message.__class__.__name__}: {message.content}\n"
+            logger.info(f"💬 Including conversation history ({len(self.memory.chat_memory.messages)} messages)")
+        else:
+            logger.info("💬 No conversation history included")
 
         # Generate answer using LLM
         full_prompt = self.system_prompt.format(
             context=context + conversation_context,
             question=query
         )
+
+        logger.info(f"🧠 Sending to LLM ({self.model_name})...")
+        logger.info(f"📏 Full prompt length: {len(full_prompt)} characters")
 
         try:
             messages = [
@@ -178,13 +204,19 @@ Answer based on the manual content provided:"""
             response = self.llm(messages)
             answer = response.content
 
+            logger.info("✅ LLM response received")
+            logger.info(f"📄 Answer length: {len(answer)} characters")
+            logger.info(f"💡 Answer preview: {answer[:200]}..." if len(answer) > 200 else f"💡 Answer: {answer}")
+
             # Store in conversation memory
             self.memory.chat_memory.add_user_message(query)
             self.memory.chat_memory.add_ai_message(answer)
 
         except Exception as e:
+            logger.error(f"❌ Error generating response: {str(e)}")
             answer = f"Error generating response: {str(e)}"
 
+        logger.info("="*80)
         return QAResponse(
             answer=answer,
             sources=sources,

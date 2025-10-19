@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from typing import List, Dict, Optional, Any
 import chromadb
 from chromadb.config import Settings
@@ -8,6 +9,9 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from sentence_transformers import SentenceTransformer
 
 from app.services.pdf_processor.pdf_extractor import DocumentChunk, ManualMetadata
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 class ChromaManager:
     """Manages ChromaDB vector database for musical instrument manuals"""
@@ -84,6 +88,12 @@ class ChromaManager:
     def search_similar(self, query: str, n_results: int = 5,
                       filters: Optional[Dict[str, Any]] = None) -> List[Dict]:
         """Search for similar chunks based on query"""
+        logger.info("="*80)
+        logger.info("🔍 CHROMADB SEMANTIC SEARCH")
+        logger.info("="*80)
+        logger.info(f"📝 Query text to embed: {query}")
+        logger.info(f"🎯 Requested results: {n_results}")
+
         where_clause = {}
 
         if filters:
@@ -94,24 +104,51 @@ class ChromaManager:
             if "section_type" in filters and filters["section_type"]:
                 where_clause["section_type"] = filters["section_type"]
 
+        if where_clause:
+            logger.info(f"🔧 Filters applied: {where_clause}")
+        else:
+            logger.info("🔧 No filters applied")
+
         results = self.collection.query(
             query_texts=[query],
             n_results=n_results,
             where=where_clause if where_clause else None
         )
 
+        logger.info(f"📊 Retrieved {len(results['documents'][0]) if results['documents'] else 0} results")
+
         # Format results
         formatted_results = []
         if results["documents"] and results["documents"][0]:
             for i, document in enumerate(results["documents"][0]):
+                distance = results["distances"][0][i] if results["distances"] else None
+                metadata = results["metadatas"][0][i]
+                chunk_id = results["ids"][0][i]
+
+                logger.info("-"*80)
+                logger.info(f"📄 Result #{i+1}:")
+                logger.info(f"   ID: {chunk_id}")
+                logger.info(f"   Distance/Score: {distance:.4f}" if distance is not None else "   Distance/Score: N/A")
+                logger.info(f"   Source: {metadata.get('display_name', metadata.get('filename', 'unknown'))}")
+                logger.info(f"   Manufacturer: {metadata.get('manufacturer', 'unknown')}")
+                logger.info(f"   Model: {metadata.get('model', 'unknown')}")
+                logger.info(f"   Instrument Type: {metadata.get('instrument_type', 'unknown')}")
+                logger.info(f"   Page: {metadata.get('page_number', '?')}")
+                logger.info(f"   Section: {metadata.get('section_type', 'general')}")
+                logger.info(f"   Content length: {len(document)} chars")
+                logger.info(f"   Content preview: {document[:150]}..." if len(document) > 150 else f"   Content: {document}")
+
                 result = {
                     "content": document,
-                    "metadata": results["metadatas"][0][i],
-                    "distance": results["distances"][0][i] if results["distances"] else None,
-                    "id": results["ids"][0][i]
+                    "metadata": metadata,
+                    "distance": distance,
+                    "id": chunk_id
                 }
                 formatted_results.append(result)
+        else:
+            logger.warning("⚠️  No results found!")
 
+        logger.info("="*80)
         return formatted_results
 
     def search_by_keywords(self, keywords: List[str], n_results: int = 5,
@@ -191,12 +228,20 @@ class ChromaManager:
     def hybrid_search(self, query: str, keywords: List[str] = None,
                      n_results: int = 5, filters: Optional[Dict[str, Any]] = None) -> List[Dict]:
         """Perform hybrid search combining semantic similarity and keyword matching"""
+        logger.info("")
+        logger.info("🔀 HYBRID SEARCH INITIATED")
+        logger.info(f"   Original query: {query}")
+        logger.info(f"   Extracted keywords: {keywords}")
+        logger.info(f"   Requested results: {n_results}")
+
         # Start with semantic search
+        logger.info("   🔹 Phase 1: Semantic search...")
         semantic_results = self.search_similar(query, n_results * 2, filters)
 
         # If keywords provided, boost results containing keywords
         if keywords:
             keyword_query = " ".join(keywords)
+            logger.info(f"   🔹 Phase 2: Keyword-based search with query: '{keyword_query}'")
             keyword_results = self.search_similar(keyword_query, n_results, filters)
 
             # Combine and deduplicate results
@@ -204,19 +249,25 @@ class ChromaManager:
             combined_results = []
 
             # Add keyword results first (higher priority)
+            logger.info("   🔹 Phase 3: Combining results (keyword results prioritized)...")
             for result in keyword_results:
                 if result["id"] not in seen_ids:
                     combined_results.append(result)
                     seen_ids.add(result["id"])
+                    logger.info(f"      ✓ Added keyword result: {result['id'][:40]}...")
 
             # Add semantic results
             for result in semantic_results:
                 if result["id"] not in seen_ids and len(combined_results) < n_results:
                     combined_results.append(result)
                     seen_ids.add(result["id"])
+                    logger.info(f"      ✓ Added semantic result: {result['id'][:40]}...")
 
-            return combined_results[:n_results]
+            final_results = combined_results[:n_results]
+            logger.info(f"   ✅ Hybrid search complete: returning {len(final_results)} results")
+            return final_results
 
+        logger.info(f"   ✅ Semantic-only search complete: returning {len(semantic_results[:n_results])} results")
         return semantic_results[:n_results]
 
     def reset_database(self) -> bool:
