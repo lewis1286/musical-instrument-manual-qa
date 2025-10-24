@@ -112,3 +112,74 @@ export interface FilterState {
   manufacturer: string;
   maxSources: number;
 }
+
+// Patch Advisor types
+export interface PatchDesignRequest {
+  query: string;
+  preferences?: Record<string, any>;
+}
+
+export interface ModuleInfo {
+  type: string;
+  name: string;
+  manufacturer: string;
+  model: string;
+  confidence: number;
+  features: string[];
+}
+
+export interface MissingModuleInfo {
+  type: string;
+  role: string;
+  specifications: string[];
+  optional: boolean;
+}
+
+export interface PatchInstruction {
+  step: number;
+  action: string;
+  module: string;
+  manual_reference?: string;
+  settings: Record<string, string>;
+}
+
+export interface AlternativeModule {
+  type: string;
+  note: string;
+}
+
+export interface PatchDesignResponse {
+  success: boolean;
+  query: string;
+  sound_type?: string;
+  characteristics: string[];
+  synthesis_approach: string;
+  patch_template?: string;
+  mermaid_diagram: string;
+  instructions: PatchInstruction[];
+  available_modules: ModuleInfo[];
+  missing_modules: MissingModuleInfo[];
+  suggested_alternatives: Array<{
+    missing_module: string;
+    alternatives: AlternativeModule[];
+  }>;
+  match_quality: number;
+  parameter_suggestions: Record<string, string>;
+  final_response: string;
+  agent_messages: string[];
+  errors: string[];
+  error?: string;
+}
+
+export interface ModuleInventoryItem {
+  filename: string;
+  manual: string;
+  manufacturer: string;
+  model: string;
+  capabilities: string[];
+}
+
+export interface ModuleInventoryResponse {
+  inventories: ModuleInventoryItem[];
+  total_count: number;
+}

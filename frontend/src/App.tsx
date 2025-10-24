@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
-import { FaUpload, FaTrash, FaBook, FaChartBar, FaRedo } from 'react-icons/fa';
+import { FaUpload, FaTrash, FaBook, FaChartBar, FaRedo, FaRocket } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useManuals } from './hooks/useManuals';
 import { useQA } from './hooks/useQA';
 import { useStats } from './hooks/useStats';
+import { PatchAdvisorTab } from './components/PatchAdvisorTab';
 import type { ManualSaveRequest } from './types';
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
   const { stats, loading: statsLoading, manufacturers, instrumentTypes, resetDatabase } = useStats();
 
   const [question, setQuestion] = useState('');
-  const [activeTab, setActiveTab] = useState<'qa' | 'manuals' | 'stats'>('qa');
+  const [activeTab, setActiveTab] = useState<'qa' | 'manuals' | 'stats' | 'patch-advisor'>('qa');
   const [editMetadata, setEditMetadata] = useState({
     display_name: '',
     manufacturer: '',
@@ -126,6 +127,17 @@ function App() {
             >
               <FaChartBar className="inline mr-2" />
               Statistics
+            </button>
+            <button
+              onClick={() => setActiveTab('patch-advisor')}
+              className={`px-6 py-4 font-semibold border-b-2 transition-colors ${
+                activeTab === 'patch-advisor'
+                  ? 'border-purple-600 text-purple-600'
+                  : 'border-transparent text-gray-600 hover:text-purple-600'
+              }`}
+            >
+              <FaRocket className="inline mr-2" />
+              Patch Advisor
             </button>
           </div>
         </div>
@@ -417,6 +429,13 @@ function App() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Patch Advisor Tab */}
+        {activeTab === 'patch-advisor' && (
+          <div className="max-w-6xl mx-auto">
+            <PatchAdvisorTab />
           </div>
         )}
       </main>
