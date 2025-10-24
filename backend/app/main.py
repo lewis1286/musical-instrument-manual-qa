@@ -38,13 +38,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Import routes (will be created next)
-from app.api.routes import manuals, qa, stats
+# Import routes
+from app.api.routes import manuals, qa, stats, patch_advisor
 
 # Register routes
 app.include_router(manuals.router, prefix="/api/manuals", tags=["manuals"])
 app.include_router(qa.router, prefix="/api/qa", tags=["qa"])
 app.include_router(stats.router, prefix="/api", tags=["stats"])
+app.include_router(patch_advisor.router, prefix="/api/patch", tags=["patch-advisor"])
 
 
 @app.get("/")
@@ -71,4 +72,20 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        reload_excludes=[
+            "chroma_db/*",
+            "*/chroma_db/*",
+            ":memory:/*",
+            "*/:memory:/*",
+            "*.db",
+            "*.sqlite",
+            "*.sqlite3",
+            "__pycache__/*",
+            "*/__pycache__/*",
+        ]
+    )

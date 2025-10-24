@@ -134,3 +134,86 @@ class PendingManual(BaseModel):
     original_filename: str
     metadata: ManualMetadataResponse
     chunk_count: int
+
+
+# Patch Advisor models
+class PatchDesignRequest(BaseModel):
+    """Request for designing a modular synthesis patch"""
+    query: str = Field(..., min_length=3, max_length=500, description="Description of desired sound")
+    preferences: Optional[Dict[str, Any]] = Field(default=None, description="User preferences for personalization")
+
+
+class ModuleInfo(BaseModel):
+    """Information about a module"""
+    type: str
+    name: str
+    manufacturer: str
+    model: str
+    confidence: float
+    features: List[str]
+
+
+class MissingModuleInfo(BaseModel):
+    """Information about a missing module"""
+    type: str
+    role: str
+    specifications: List[str]
+    optional: bool
+
+
+class PatchInstruction(BaseModel):
+    """A single patching instruction step"""
+    step: int
+    action: str
+    module: str
+    manual_reference: Optional[str] = None
+    settings: Dict[str, str] = {}
+
+
+class AlternativeModule(BaseModel):
+    """Alternative module suggestion"""
+    type: str
+    note: str
+
+
+class PatchDesignResponse(BaseModel):
+    """Response with complete patch design"""
+    success: bool
+    query: str
+    sound_type: Optional[str] = None
+    characteristics: List[str] = []
+    synthesis_approach: str = ""
+    patch_template: Optional[str] = None
+    mermaid_diagram: str = ""
+    instructions: List[PatchInstruction] = []
+    available_modules: List[ModuleInfo] = []
+    missing_modules: List[MissingModuleInfo] = []
+    suggested_alternatives: List[Dict[str, Any]] = []
+    match_quality: float = 0.0
+    parameter_suggestions: Dict[str, str] = {}
+    final_response: str = ""
+    agent_messages: List[str] = []
+    errors: List[str] = []
+    error: Optional[str] = None
+
+
+class ModuleInventoryItem(BaseModel):
+    """Module inventory for a manual"""
+    filename: str
+    manual: str
+    manufacturer: str
+    model: str
+    capabilities: List[str]
+
+
+class ModuleInventoryResponse(BaseModel):
+    """Response with module inventory"""
+    inventories: List[ModuleInventoryItem]
+    total_count: int
+
+
+class ModuleCapabilityStats(BaseModel):
+    """Statistics about module capabilities"""
+    total_manuals_with_modules: int
+    capability_counts: Dict[str, int]
+    most_common_capabilities: List[tuple]

@@ -16,9 +16,11 @@ from app.api.models.schemas import (
     ErrorResponse,
     PendingManual,
 )
-from app.core.dependencies import get_chroma_manager, get_pdf_extractor
+from app.core.dependencies import get_chroma_manager, get_pdf_extractor, get_module_inventory
 from app.services.vector_db.chroma_manager import ChromaManager
+from app.services.vector_db.module_inventory import ModuleInventoryManager
 from app.services.pdf_processor.pdf_extractor import PDFExtractor
+from app.services.pdf_processor.module_detector import ModuleDetector
 
 router = APIRouter()
 
@@ -82,9 +84,11 @@ async def process_manual(
 async def save_manual(
     request: ManualSaveRequest,
     chroma_manager: ChromaManager = Depends(get_chroma_manager),
+    module_inventory: ModuleInventoryManager = Depends(get_module_inventory),
 ):
     """
     Stage 2: Save manual with user-confirmed metadata
+    Also extracts module capabilities for the patch advisor
     """
     # Find pending manual by filename
     session_id = None
@@ -114,6 +118,11 @@ async def save_manual(
         # Add to vector database
         chroma_manager.add_manual_chunks(chunks)
 
+        # Extract and save module capabilities for patch advisor
+        module_detector = ModuleDetector()
+        module_inventory_item = module_detector.analyze_manual_for_modules(chunks, metadata_obj)
+        module_inventory.add_module_inventory(module_inventory_item)
+
         # Clean up temporary file
         os.unlink(data["pending"].temp_file_path)
 
@@ -122,8 +131,9 @@ async def save_manual(
 
         return {
             "success": True,
-            "message": f"Manual '{request.display_name}' saved successfully",
+            "message": f"Manual '{request.display_name}' saved successfully with {len(module_inventory_item.capabilities)} module capabilities detected",
             "filename": request.filename,
+            "module_capabilities": len(module_inventory_item.capabilities),
         }
 
     except Exception as e:
