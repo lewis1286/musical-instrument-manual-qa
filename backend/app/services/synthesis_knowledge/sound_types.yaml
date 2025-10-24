@@ -1,0 +1,414 @@
+# Sound Types to Synthesis Requirements Mapping
+# Maps sonic goals to required signal processing chains and module capabilities
+
+sound_types:
+  drone:
+    description: "Sustained, evolving tones with slow harmonic changes"
+    characteristics:
+      - sustained
+      - evolving
+      - harmonic_rich
+      - ambient
+    required_modules:
+      - type: vco
+        count: 1-2
+        specs:
+          - stable_tuning
+          - multiple_waveforms
+      - type: vcf
+        count: 1
+        specs:
+          - resonance_control
+          - cv_input
+      - type: lfo
+        count: 1-2
+        specs:
+          - very_slow_rates
+          - multiple_outputs
+      - type: vca
+        count: 1
+        specs:
+          - cv_control
+    optional_modules:
+      - type: reverb
+        priority: high
+      - type: delay
+        priority: medium
+      - type: chorus
+        priority: low
+    patch_strategy: "Layer sustained oscillators, slowly modulate filter cutoff with LFO, add spatial effects"
+    example_parameters:
+      lfo_rate: "0.01-0.1 Hz"
+      filter_resonance: "medium-high"
+      reverb_mix: "30-60%"
+
+  bass:
+    description: "Low-frequency melodic or rhythmic foundation"
+    characteristics:
+      - low_frequency
+      - punchy
+      - rhythmic
+      - fundamental_focused
+    required_modules:
+      - type: vco
+        count: 1-2
+        specs:
+          - sub_oscillator
+          - sawtooth_or_square
+          - tracking_1v_per_octave
+      - type: vcf
+        count: 1
+        specs:
+          - lowpass
+          - resonance_control
+          - fast_envelope_response
+      - type: envelope
+        count: 2
+        specs:
+          - snappy_attack
+          - adjustable_decay
+      - type: vca
+        count: 1
+        specs:
+          - envelope_control
+    optional_modules:
+      - type: distortion
+        priority: medium
+      - type: compressor
+        priority: medium
+    patch_strategy: "Use envelope to shape filter (plucky character), fast attack on VCA envelope, subtle distortion for grit"
+    example_parameters:
+      filter_envelope_amount: "high"
+      filter_attack: "0-5ms"
+      filter_decay: "100-500ms"
+      vca_attack: "0-2ms"
+
+  lead:
+    description: "Melodic, expressive, cutting through mix"
+    characteristics:
+      - melodic
+      - expressive
+      - bright
+      - articulate
+    required_modules:
+      - type: vco
+        count: 1-3
+        specs:
+          - stable_tuning
+          - detune_control
+          - multiple_waveforms
+      - type: vcf
+        count: 1
+        specs:
+          - bandpass_or_highpass
+          - keyboard_tracking
+          - envelope_amount
+      - type: envelope
+        count: 2
+        specs:
+          - all_stages_adsr
+      - type: vca
+        count: 1
+        specs:
+          - envelope_control
+      - type: lfo
+        count: 1
+        specs:
+          - vibrato_rate
+    optional_modules:
+      - type: portamento
+        priority: high
+      - type: delay
+        priority: medium
+      - type: chorus
+        priority: low
+    patch_strategy: "Multiple VCOs detuned, filter with keyboard tracking, vibrato LFO, portamento for expression"
+    example_parameters:
+      detune: "slight (2-5 cents)"
+      filter_tracking: "80-100%"
+      vibrato_rate: "5-7 Hz"
+      vibrato_amount: "subtle"
+
+  pad:
+    description: "Lush, sustained chordal textures"
+    characteristics:
+      - lush
+      - sustained
+      - harmonic_complex
+      - smooth
+    required_modules:
+      - type: vco
+        count: 2-4
+        specs:
+          - stable_tuning
+          - multiple_outputs
+      - type: vcf
+        count: 1-2
+        specs:
+          - lowpass
+          - gentle_slope
+          - slow_modulation
+      - type: lfo
+        count: 2
+        specs:
+          - slow_rates
+          - multiple_waveforms
+      - type: vca
+        count: 1
+        specs:
+          - slow_envelope
+      - type: envelope
+        count: 1
+        specs:
+          - slow_attack
+          - long_release
+    optional_modules:
+      - type: chorus
+        priority: high
+      - type: reverb
+        priority: high
+      - type: delay
+        priority: medium
+    patch_strategy: "Multiple detuned VCOs, gentle filter modulation, slow attack/release envelopes, lush effects"
+    example_parameters:
+      attack: "500ms-2s"
+      release: "1-4s"
+      chorus_depth: "medium-high"
+      reverb_decay: "2-5s"
+
+  percussion:
+    description: "Short, rhythmic, transient-rich sounds"
+    characteristics:
+      - transient
+      - rhythmic
+      - short
+      - punchy
+    required_modules:
+      - type: vco
+        count: 1-2
+        specs:
+          - fm_input_or_sync
+          - noise_source
+      - type: vcf
+        count: 1
+        specs:
+          - fast_envelope_response
+          - high_resonance
+      - type: envelope
+        count: 2-3
+        specs:
+          - very_fast_attack
+          - short_decay
+          - no_sustain_needed
+      - type: vca
+        count: 1
+        specs:
+          - fast_response
+    optional_modules:
+      - type: waveshaper
+        priority: medium
+      - type: short_delay
+        priority: low
+    patch_strategy: "Use pitch envelope on VCO (drops quickly), self-oscillating filter or FM for tonality, noise for attack"
+    example_parameters:
+      pitch_envelope_amount: "high"
+      pitch_decay: "10-100ms"
+      filter_resonance: "high (near self-oscillation)"
+      vca_decay: "50-500ms"
+
+  arpeggio:
+    description: "Sequenced, rhythmic melodic patterns"
+    characteristics:
+      - rhythmic
+      - melodic
+      - repetitive
+      - energetic
+    required_modules:
+      - type: vco
+        count: 1-2
+        specs:
+          - accurate_tracking
+          - multiple_waveforms
+      - type: vcf
+        count: 1
+        specs:
+          - keyboard_tracking
+          - envelope_amount
+      - type: envelope
+        count: 2
+        specs:
+          - adjustable_all_stages
+      - type: vca
+        count: 1
+        specs:
+          - envelope_control
+      - type: sequencer
+        count: 1
+        specs:
+          - cv_output
+          - gate_output
+          - clock_sync
+    optional_modules:
+      - type: delay
+        priority: high
+      - type: quantizer
+        priority: medium
+    patch_strategy: "Sequencer drives VCO pitch, moderate envelope times, filter tracking for consistency, rhythmic delay"
+    example_parameters:
+      envelope_attack: "1-10ms"
+      envelope_decay: "50-200ms"
+      filter_tracking: "100%"
+      delay_time: "dotted_eighth or sixteenth"
+
+  texture:
+    description: "Complex, evolving, atmospheric sounds"
+    characteristics:
+      - complex
+      - evolving
+      - atmospheric
+      - unpredictable
+    required_modules:
+      - type: noise_source
+        count: 1
+        specs:
+          - multiple_colors
+      - type: vcf
+        count: 2-3
+        specs:
+          - different_types
+          - cv_inputs
+      - type: lfo
+        count: 2-3
+        specs:
+          - very_slow_to_audio_rate
+          - multiple_waveforms
+      - type: vca
+        count: 2
+        specs:
+          - cv_control
+      - type: sample_and_hold
+        count: 1
+        specs:
+          - random_output
+    optional_modules:
+      - type: reverb
+        priority: high
+      - type: delay
+        priority: high
+      - type: granular
+        priority: medium
+    patch_strategy: "Use noise through multiple filters, random modulation via S&H, cross-modulation between LFOs"
+    example_parameters:
+      filter_modulation: "complex (multiple LFOs)"
+      s_h_rate: "slow-medium random"
+      reverb_size: "large"
+
+  fm_bell:
+    description: "Metallic, bell-like tones using frequency modulation"
+    characteristics:
+      - metallic
+      - harmonic_complex
+      - bright
+      - percussive
+    required_modules:
+      - type: vco
+        count: 2
+        specs:
+          - linear_fm_input
+          - sine_wave
+      - type: envelope
+        count: 2-3
+        specs:
+          - fast_attack
+          - exponential_decay
+      - type: vca
+        count: 2
+        specs:
+          - exponential_response
+    optional_modules:
+      - type: reverb
+        priority: high
+    patch_strategy: "VCO1 modulates VCO2 via FM, envelope controls FM amount (high attack, fast decay), long VCA release"
+    example_parameters:
+      fm_ratio: "non_integer (e.g., 1.414, 3.7)"
+      fm_amount: "high at attack, decays quickly"
+      vca_release: "1-5s"
+
+  pluck:
+    description: "Plucked string or struck resonator sounds"
+    characteristics:
+      - transient
+      - harmonic
+      - decaying
+      - natural
+    required_modules:
+      - type: vco
+        count: 1
+        specs:
+          - multiple_waveforms
+          - tracking
+      - type: vcf
+        count: 1
+        specs:
+          - lowpass
+          - resonance
+          - fast_envelope
+      - type: envelope
+        count: 2
+        specs:
+          - instant_attack
+          - exponential_decay
+      - type: vca
+        count: 1
+        specs:
+          - fast_response
+    optional_modules:
+      - type: delay
+        priority: medium
+        specs:
+          - short_time
+      - type: karplus_strong
+        priority: high
+    patch_strategy: "Fast filter envelope (instant attack, quick decay), body resonance via filter resonance, short delay for string reflection"
+    example_parameters:
+      filter_attack: "0ms"
+      filter_decay: "50-300ms"
+      filter_resonance: "medium-high"
+      vca_decay: "500ms-2s"
+
+  sweep:
+    description: "Filter sweeps, risers, and downlifters"
+    characteristics:
+      - dynamic
+      - transitional
+      - rhythmic
+      - building
+    required_modules:
+      - type: vco
+        count: 1-2
+        specs:
+          - stable_output
+      - type: vcf
+        count: 1
+        specs:
+          - wide_cutoff_range
+          - resonance
+          - cv_input
+      - type: envelope
+        count: 1
+        specs:
+          - very_slow_attack_or_decay
+      - type: vca
+        count: 1
+        specs:
+          - cv_control
+    optional_modules:
+      - type: delay
+        priority: medium
+      - type: reverb
+        priority: low
+    patch_strategy: "Use slow envelope to sweep filter from closed to open (riser) or open to closed (downlifter), moderate resonance for emphasis"
+    example_parameters:
+      sweep_time: "4-16 bars"
+      filter_resonance: "medium-high"
+      noise_content: "optional layer"

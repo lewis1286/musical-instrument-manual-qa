@@ -1,0 +1,491 @@
+# Module Capability Taxonomy
+# Standardized classification of modular synthesis modules and their capabilities
+
+module_types:
+  vco:
+    full_name: "Voltage Controlled Oscillator"
+    category: "sound_source"
+    description: "Primary tone generator producing periodic waveforms"
+    common_keywords:
+      - oscillator
+      - vco
+      - tone generator
+      - wavetable
+      - digital oscillator
+      - analog oscillator
+    specifications:
+      - name: "waveforms"
+        type: "list"
+        options: ["sine", "triangle", "sawtooth", "square", "pulse", "wavetable", "noise"]
+      - name: "tracking"
+        type: "string"
+        options: ["1v_per_octave", "hz_per_volt", "none"]
+      - name: "modulation_inputs"
+        type: "list"
+        options: ["fm", "linear_fm", "pwm", "sync", "am"]
+      - name: "tuning_range"
+        type: "string"
+        examples: ["LFO to audio", "sub-bass to ultrasonic", "C0-C8"]
+      - name: "multiple_outputs"
+        type: "boolean"
+      - name: "sub_oscillator"
+        type: "boolean"
+    detection_patterns:
+      - "oscillator"
+      - "VCO"
+      - "tone generator"
+      - "pitch.*v/oct"
+      - "1v/octave"
+      - "FM input"
+      - "sync input"
+
+  vcf:
+    full_name: "Voltage Controlled Filter"
+    category: "modifier"
+    description: "Shapes timbre by removing or emphasizing frequency content"
+    common_keywords:
+      - filter
+      - vcf
+      - multimode filter
+      - state variable filter
+      - ladder filter
+    specifications:
+      - name: "filter_types"
+        type: "list"
+        options: ["lowpass", "highpass", "bandpass", "notch", "allpass", "formant", "comb"]
+      - name: "poles"
+        type: "string"
+        options: ["2-pole", "4-pole", "multimode"]
+      - name: "resonance"
+        type: "boolean"
+      - name: "self_oscillation"
+        type: "boolean"
+      - name: "cv_inputs"
+        type: "list"
+        options: ["cutoff", "resonance", "fm"]
+      - name: "keyboard_tracking"
+        type: "boolean"
+    detection_patterns:
+      - "filter"
+      - "VCF"
+      - "low.?pass"
+      - "high.?pass"
+      - "band.?pass"
+      - "resonance"
+      - "cutoff"
+      - "Q factor"
+
+  vca:
+    full_name: "Voltage Controlled Amplifier"
+    category: "modifier"
+    description: "Controls signal level dynamically via CV"
+    common_keywords:
+      - amplifier
+      - vca
+      - voltage controlled amplifier
+      - attenuator
+      - linear vca
+      - exponential vca
+    specifications:
+      - name: "response_curve"
+        type: "string"
+        options: ["linear", "exponential", "switchable"]
+      - name: "channels"
+        type: "integer"
+        examples: [1, 2, 4, 8]
+      - name: "cv_inputs"
+        type: "integer"
+      - name: "offset_control"
+        type: "boolean"
+    detection_patterns:
+      - "VCA"
+      - "amplifier"
+      - "gain.*CV"
+      - "level.*CV"
+      - "linear.*exponential"
+
+  envelope:
+    full_name: "Envelope Generator"
+    category: "modulation"
+    description: "Creates time-varying control voltages for shaping sounds"
+    common_keywords:
+      - envelope
+      - adsr
+      - ad
+      - ar
+      - envelope generator
+      - eg
+      - function generator
+    specifications:
+      - name: "stages"
+        type: "string"
+        options: ["AD", "AR", "ADSR", "DADSR", "AHDSR", "multi-stage"]
+      - name: "response_curves"
+        type: "list"
+        options: ["linear", "exponential", "logarithmic", "variable"]
+      - name: "time_range"
+        type: "string"
+        examples: ["1ms-10s", "audio rate to minutes"]
+      - name: "looping"
+        type: "boolean"
+      - name: "cv_inputs"
+        type: "list"
+        options: ["attack", "decay", "sustain", "release", "all_stages"]
+    detection_patterns:
+      - "envelope"
+      - "ADSR"
+      - "attack.*decay"
+      - "function generator"
+      - "contour"
+
+  lfo:
+    full_name: "Low Frequency Oscillator"
+    category: "modulation"
+    description: "Slow periodic modulation source"
+    common_keywords:
+      - lfo
+      - low frequency oscillator
+      - modulation oscillator
+    specifications:
+      - name: "waveforms"
+        type: "list"
+        options: ["sine", "triangle", "square", "sawtooth", "random", "sample_and_hold"]
+      - name: "frequency_range"
+        type: "string"
+        examples: ["0.001Hz-100Hz", "very slow to audio rate"]
+      - name: "sync"
+        type: "boolean"
+      - name: "cv_inputs"
+        type: "list"
+        options: ["rate", "shape", "reset"]
+      - name: "multiple_outputs"
+        type: "boolean"
+    detection_patterns:
+      - "LFO"
+      - "low frequency"
+      - "modulation.*rate"
+      - "cycling"
+
+  sequencer:
+    full_name: "Sequencer"
+    category: "control"
+    description: "Generates sequences of CVs and gates for melody and rhythm"
+    common_keywords:
+      - sequencer
+      - step sequencer
+      - cv sequencer
+      - gate sequencer
+    specifications:
+      - name: "steps"
+        type: "integer"
+        examples: [8, 16, 32, 64]
+      - name: "outputs"
+        type: "list"
+        options: ["cv", "gate", "trigger", "mod"]
+      - name: "clock_source"
+        type: "list"
+        options: ["internal", "external", "both"]
+      - name: "cv_recording"
+        type: "boolean"
+      - name: "randomization"
+        type: "boolean"
+    detection_patterns:
+      - "sequencer"
+      - "step.*program"
+      - "pattern"
+      - "CV.*gate.*sequence"
+
+  reverb:
+    full_name: "Reverb"
+    category: "effects"
+    description: "Simulates acoustic spaces and adds depth"
+    common_keywords:
+      - reverb
+      - reverberation
+      - room
+      - hall
+      - plate
+      - spring
+    specifications:
+      - name: "algorithm"
+        type: "string"
+        options: ["spring", "plate", "room", "hall", "shimmer", "convolution"]
+      - name: "decay_time"
+        type: "string"
+        examples: ["0.1s-30s", "infinite"]
+      - name: "cv_inputs"
+        type: "list"
+        options: ["decay", "size", "damping", "mix"]
+      - name: "stereo"
+        type: "boolean"
+    detection_patterns:
+      - "reverb"
+      - "room.*size"
+      - "decay.*time"
+      - "spring"
+      - "plate"
+
+  delay:
+    full_name: "Delay/Echo"
+    category: "effects"
+    description: "Time-based effect creating echoes and rhythmic patterns"
+    common_keywords:
+      - delay
+      - echo
+      - digital delay
+      - analog delay
+      - tape delay
+    specifications:
+      - name: "delay_type"
+        type: "string"
+        options: ["digital", "analog", "tape", "multi-tap"]
+      - name: "max_delay_time"
+        type: "string"
+        examples: ["1ms-5s", "tap tempo"]
+      - name: "cv_inputs"
+        type: "list"
+        options: ["time", "feedback", "mix"]
+      - name: "modulation"
+        type: "boolean"
+      - name: "stereo"
+        type: "boolean"
+    detection_patterns:
+      - "delay"
+      - "echo"
+      - "feedback"
+      - "delay.*time"
+      - "tap tempo"
+
+  chorus:
+    full_name: "Chorus/Flanger/Phaser"
+    category: "effects"
+    description: "Modulation-based effects for width and movement"
+    common_keywords:
+      - chorus
+      - flanger
+      - phaser
+      - modulation effect
+    specifications:
+      - name: "effect_type"
+        type: "string"
+        options: ["chorus", "flanger", "phaser", "vibrato"]
+      - name: "modulation_source"
+        type: "string"
+        options: ["internal_lfo", "external_cv"]
+      - name: "cv_inputs"
+        type: "list"
+        options: ["rate", "depth", "feedback", "mix"]
+      - name: "stereo"
+        type: "boolean"
+    detection_patterns:
+      - "chorus"
+      - "flanger"
+      - "phaser"
+      - "mod.*depth"
+
+  distortion:
+    full_name: "Distortion/Waveshaper"
+    category: "effects"
+    description: "Adds harmonic content and saturation"
+    common_keywords:
+      - distortion
+      - overdrive
+      - waveshaper
+      - saturation
+      - fuzz
+    specifications:
+      - name: "distortion_type"
+        type: "string"
+        options: ["wavefolder", "clipper", "saturation", "bitcrusher", "fuzz"]
+      - name: "cv_inputs"
+        type: "list"
+        options: ["amount", "fold", "bias"]
+    detection_patterns:
+      - "distortion"
+      - "wavefold"
+      - "saturation"
+      - "overdrive"
+      - "fuzz"
+      - "bitcrush"
+
+  mixer:
+    full_name: "Mixer"
+    category: "utility"
+    description: "Combines multiple signals with level control"
+    common_keywords:
+      - mixer
+      - summing mixer
+      - cv mixer
+      - audio mixer
+    specifications:
+      - name: "channels"
+        type: "integer"
+        examples: [2, 4, 6, 8, 16]
+      - name: "signal_type"
+        type: "list"
+        options: ["audio", "cv", "both"]
+      - name: "cv_level_control"
+        type: "boolean"
+      - name: "stereo"
+        type: "boolean"
+    detection_patterns:
+      - "mixer"
+      - "summing"
+      - "channel.*input"
+
+  attenuator:
+    full_name: "Attenuator/Attenuverter"
+    category: "utility"
+    description: "Scales and inverts CV and audio signals"
+    common_keywords:
+      - attenuator
+      - attenuverter
+      - offset
+      - inverter
+    specifications:
+      - name: "channels"
+        type: "integer"
+      - name: "bipolar"
+        type: "boolean"
+      - name: "offset"
+        type: "boolean"
+      - name: "cv_control"
+        type: "boolean"
+    detection_patterns:
+      - "attenuator"
+      - "attenuverter"
+      - "offset"
+      - "inverter"
+
+  sample_and_hold:
+    full_name: "Sample and Hold"
+    category: "utility"
+    description: "Samples input voltage and holds it until triggered again"
+    common_keywords:
+      - sample and hold
+      - s&h
+      - track and hold
+      - random voltage
+    specifications:
+      - name: "noise_source"
+        type: "boolean"
+      - name: "channels"
+        type: "integer"
+      - name: "slew"
+        type: "boolean"
+    detection_patterns:
+      - "sample.*hold"
+      - "S&H"
+      - "S/H"
+      - "random.*voltage"
+      - "track.*hold"
+
+  noise_source:
+    full_name: "Noise Source"
+    category: "sound_source"
+    description: "Generates random signals for percussion, textures, and modulation"
+    common_keywords:
+      - noise
+      - noise generator
+      - white noise
+      - pink noise
+    specifications:
+      - name: "noise_colors"
+        type: "list"
+        options: ["white", "pink", "red", "blue", "violet"]
+      - name: "sample_and_hold"
+        type: "boolean"
+    detection_patterns:
+      - "noise"
+      - "white.*pink"
+      - "random.*signal"
+
+  clock:
+    full_name: "Clock/Divider/Multiplier"
+    category: "control"
+    description: "Generates and manipulates timing signals"
+    common_keywords:
+      - clock
+      - clock divider
+      - clock multiplier
+      - tempo
+      - bpm
+    specifications:
+      - name: "divisions"
+        type: "list"
+        examples: ["/2, /4, /8, /16", "x2, x4"]
+      - name: "swing"
+        type: "boolean"
+      - name: "tap_tempo"
+        type: "boolean"
+      - name: "reset"
+        type: "boolean"
+    detection_patterns:
+      - "clock"
+      - "divider"
+      - "multiplier"
+      - "BPM"
+      - "tempo"
+
+  logic:
+    full_name: "Logic Module"
+    category: "utility"
+    description: "Boolean operations on gate signals"
+    common_keywords:
+      - logic
+      - boolean
+      - and
+      - or
+      - xor
+    specifications:
+      - name: "operations"
+        type: "list"
+        options: ["AND", "OR", "XOR", "NOT", "NAND", "NOR"]
+    detection_patterns:
+      - "logic"
+      - "AND.*OR"
+      - "boolean"
+      - "gate.*logic"
+
+  quantizer:
+    full_name: "Quantizer"
+    category: "utility"
+    description: "Constrains CV to specific scales and pitches"
+    common_keywords:
+      - quantizer
+      - scale
+      - pitch quantizer
+    specifications:
+      - name: "scales"
+        type: "list"
+        options: ["chromatic", "major", "minor", "custom"]
+      - name: "channels"
+        type: "integer"
+      - name: "trigger_output"
+        type: "boolean"
+    detection_patterns:
+      - "quantizer"
+      - "scale"
+      - "pitch.*snap"
+      - "chromatic"
+
+  multiple:
+    full_name: "Multiple/Buffered Multiple"
+    category: "utility"
+    description: "Distributes one signal to multiple destinations"
+    common_keywords:
+      - multiple
+      - mult
+      - buffered multiple
+      - stackable
+    specifications:
+      - name: "outputs"
+        type: "integer"
+        examples: [2, 3, 4, 6]
+      - name: "buffered"
+        type: "boolean"
+    detection_patterns:
+      - "multiple"
+      - "mult"
+      - "buffered"
+      - "signal.*distribution"

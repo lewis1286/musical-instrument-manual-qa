@@ -1,0 +1,450 @@
+# Patch Templates
+# Common modular synthesis signal routing patterns
+
+templates:
+  classic_subtractive:
+    name: "Classic Subtractive Synthesis"
+    description: "Traditional synthesizer voice architecture"
+    sound_types: ["bass", "lead", "pad"]
+    signal_flow:
+      - step: 1
+        action: "Generate pitch CV from sequencer or keyboard"
+        module_type: "sequencer"
+        connections: []
+      - step: 2
+        action: "Create audio tone"
+        module_type: "vco"
+        connections:
+          - from: "sequencer"
+            to_input: "v/oct"
+            signal_type: "cv"
+      - step: 3
+        action: "Shape timbre with filter"
+        module_type: "vcf"
+        connections:
+          - from: "vco"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "envelope_1"
+            to_input: "cutoff_cv"
+            signal_type: "cv"
+      - step: 4
+        action: "Control amplitude"
+        module_type: "vca"
+        connections:
+          - from: "vcf"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "envelope_2"
+            to_input: "level_cv"
+            signal_type: "cv"
+      - step: 5
+        action: "Generate filter envelope"
+        module_type: "envelope"
+        instance_id: "envelope_1"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+      - step: 6
+        action: "Generate amplitude envelope"
+        module_type: "envelope"
+        instance_id: "envelope_2"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+    mermaid_template: |
+      graph LR
+        SEQ[Sequencer] -->|CV| VCO[VCO]
+        VCO -->|Audio| VCF[VCF]
+        VCF -->|Audio| VCA[VCA]
+        SEQ -->|Gate| ENV1[Envelope 1<br/>Filter]
+        SEQ -->|Gate| ENV2[Envelope 2<br/>VCA]
+        ENV1 -.->|Mod| VCF
+        ENV2 -.->|Mod| VCA
+
+  drone_machine:
+    name: "Evolving Drone"
+    description: "Slowly modulated sustained tones"
+    sound_types: ["drone", "pad", "texture"]
+    signal_flow:
+      - step: 1
+        action: "Generate fundamental tone"
+        module_type: "vco"
+        instance_id: "vco_1"
+        connections: []
+      - step: 2
+        action: "Generate detuned second voice (optional)"
+        module_type: "vco"
+        instance_id: "vco_2"
+        optional: true
+        connections: []
+      - step: 3
+        action: "Mix oscillators"
+        module_type: "mixer"
+        connections:
+          - from: "vco_1"
+            to_input: "channel_1"
+            signal_type: "audio"
+          - from: "vco_2"
+            to_input: "channel_2"
+            signal_type: "audio"
+      - step: 4
+        action: "Slowly modulate filter cutoff"
+        module_type: "vcf"
+        connections:
+          - from: "mixer"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "lfo_1"
+            to_input: "cutoff_cv"
+            signal_type: "cv"
+      - step: 5
+        action: "Add spatial depth"
+        module_type: "reverb"
+        optional: true
+        connections:
+          - from: "vcf"
+            to_input: "audio_in"
+            signal_type: "audio"
+      - step: 6
+        action: "Generate slow modulation"
+        module_type: "lfo"
+        instance_id: "lfo_1"
+        settings:
+          rate: "very slow (0.01-0.1 Hz)"
+        connections: []
+    mermaid_template: |
+      graph LR
+        VCO1[VCO 1] --> MIX[Mixer]
+        VCO2[VCO 2<br/>detuned] -.-> MIX
+        MIX --> VCF[VCF]
+        VCF --> REV[Reverb]
+        LFO[LFO<br/>slow] -.->|Mod| VCF
+
+  fm_bell:
+    name: "FM Bell/Metallic Tone"
+    description: "Frequency modulation for harmonic complexity"
+    sound_types: ["fm_bell", "percussion"]
+    signal_flow:
+      - step: 1
+        action: "Generate modulator signal"
+        module_type: "vco"
+        instance_id: "vco_modulator"
+        connections:
+          - from: "envelope_fm"
+            to_input: "v/oct"
+            signal_type: "cv"
+      - step: 2
+        action: "Generate carrier with FM input"
+        module_type: "vco"
+        instance_id: "vco_carrier"
+        connections:
+          - from: "vco_modulator"
+            to_input: "fm_in"
+            signal_type: "audio"
+          - from: "sequencer"
+            to_input: "v/oct"
+            signal_type: "cv"
+      - step: 3
+        action: "Control FM amount with fast envelope"
+        module_type: "envelope"
+        instance_id: "envelope_fm"
+        settings:
+          attack: "fast"
+          decay: "medium"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+      - step: 4
+        action: "Shape amplitude with slow decay"
+        module_type: "vca"
+        connections:
+          - from: "vco_carrier"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "envelope_vca"
+            to_input: "level_cv"
+            signal_type: "cv"
+      - step: 5
+        action: "Long release envelope for VCA"
+        module_type: "envelope"
+        instance_id: "envelope_vca"
+        settings:
+          attack: "instant"
+          release: "long (1-5s)"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+    mermaid_template: |
+      graph LR
+        SEQ[Sequencer] -->|CV| VCOCR[VCO Carrier]
+        SEQ -->|Gate| ENVFM[Env FM]
+        SEQ -->|Gate| ENVVCA[Env VCA]
+        ENVFM -->|CV| VCOMOD[VCO Modulator]
+        VCOMOD -->|FM| VCOCR
+        VCOCR -->|Audio| VCA[VCA]
+        ENVVCA -.->|Mod| VCA
+
+  generative_texture:
+    name: "Generative Texture"
+    description: "Self-evolving complex soundscape"
+    sound_types: ["texture", "drone"]
+    signal_flow:
+      - step: 1
+        action: "Generate random voltages"
+        module_type: "sample_and_hold"
+        connections:
+          - from: "noise_source"
+            to_input: "signal_in"
+            signal_type: "audio"
+          - from: "lfo_clock"
+            to_input: "trigger"
+            signal_type: "gate"
+      - step: 2
+        action: "Provide noise for S&H"
+        module_type: "noise_source"
+        connections: []
+      - step: 3
+        action: "Clock S&H with slow LFO"
+        module_type: "lfo"
+        instance_id: "lfo_clock"
+        settings:
+          rate: "slow random"
+        connections: []
+      - step: 4
+        action: "Pass noise through modulated filter"
+        module_type: "vcf"
+        instance_id: "vcf_1"
+        connections:
+          - from: "noise_source"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "sample_and_hold"
+            to_input: "cutoff_cv"
+            signal_type: "cv"
+      - step: 5
+        action: "Second modulated filter for complexity"
+        module_type: "vcf"
+        instance_id: "vcf_2"
+        connections:
+          - from: "vcf_1"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "lfo_mod"
+            to_input: "cutoff_cv"
+            signal_type: "cv"
+      - step: 6
+        action: "Add another modulation layer"
+        module_type: "lfo"
+        instance_id: "lfo_mod"
+        settings:
+          rate: "different from clock"
+        connections: []
+      - step: 7
+        action: "Spatial processing"
+        module_type: "reverb"
+        optional: true
+        connections:
+          - from: "vcf_2"
+            to_input: "audio_in"
+            signal_type: "audio"
+    mermaid_template: |
+      graph LR
+        NOISE[Noise] --> SH[S&H]
+        NOISE --> VCF1[VCF 1]
+        LFOCLK[LFO Clock] --> SH
+        SH -.->|Mod| VCF1
+        VCF1 --> VCF2[VCF 2]
+        LFOMOD[LFO Mod] -.->|Mod| VCF2
+        VCF2 --> REV[Reverb]
+
+  arpeggio_pattern:
+    name: "Sequenced Arpeggio"
+    description: "Rhythmic melodic pattern with modulation"
+    sound_types: ["arpeggio", "lead"]
+    signal_flow:
+      - step: 1
+        action: "Generate melodic pattern"
+        module_type: "sequencer"
+        connections: []
+      - step: 2
+        action: "Create pitched tone"
+        module_type: "vco"
+        connections:
+          - from: "sequencer"
+            to_input: "v/oct"
+            signal_type: "cv"
+      - step: 3
+        action: "Shape with filter (envelope + tracking)"
+        module_type: "vcf"
+        connections:
+          - from: "vco"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "envelope_filter"
+            to_input: "cutoff_cv"
+            signal_type: "cv"
+          - from: "sequencer"
+            to_input: "cutoff_cv"
+            signal_type: "cv"
+            note: "keyboard tracking"
+      - step: 4
+        action: "Control amplitude"
+        module_type: "vca"
+        connections:
+          - from: "vcf"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "envelope_vca"
+            to_input: "level_cv"
+            signal_type: "cv"
+      - step: 5
+        action: "Fast filter envelope"
+        module_type: "envelope"
+        instance_id: "envelope_filter"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+      - step: 6
+        action: "VCA envelope for articulation"
+        module_type: "envelope"
+        instance_id: "envelope_vca"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+      - step: 7
+        action: "Rhythmic delay"
+        module_type: "delay"
+        optional: true
+        settings:
+          time: "dotted eighth or sixteenth"
+        connections:
+          - from: "vca"
+            to_input: "audio_in"
+            signal_type: "audio"
+    mermaid_template: |
+      graph LR
+        SEQ[Sequencer] -->|CV| VCO[VCO]
+        VCO --> VCF[VCF]
+        VCF --> VCA[VCA]
+        SEQ -->|Gate| ENVF[Env Filter]
+        SEQ -->|Gate| ENVA[Env VCA]
+        SEQ -->|CV| VCF
+        ENVF -.->|Mod| VCF
+        ENVA -.->|Mod| VCA
+        VCA --> DEL[Delay]
+
+  plucked_string:
+    name: "Plucked String/Karplus-Strong"
+    description: "Natural plucked or struck sounds"
+    sound_types: ["pluck", "percussion"]
+    signal_flow:
+      - step: 1
+        action: "Generate excitation signal"
+        module_type: "vco"
+        connections:
+          - from: "sequencer"
+            to_input: "v/oct"
+            signal_type: "cv"
+      - step: 2
+        action: "Create sharp attack with filter ping"
+        module_type: "vcf"
+        settings:
+          resonance: "high"
+        connections:
+          - from: "vco"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "envelope_ping"
+            to_input: "cutoff_cv"
+            signal_type: "cv"
+      - step: 3
+        action: "Instant attack, fast decay envelope"
+        module_type: "envelope"
+        instance_id: "envelope_ping"
+        settings:
+          attack: "0ms"
+          decay: "50-300ms"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+      - step: 4
+        action: "Amplitude decay"
+        module_type: "vca"
+        connections:
+          - from: "vcf"
+            to_input: "audio_in"
+            signal_type: "audio"
+          - from: "envelope_vca"
+            to_input: "level_cv"
+            signal_type: "cv"
+      - step: 5
+        action: "Longer VCA decay"
+        module_type: "envelope"
+        instance_id: "envelope_vca"
+        settings:
+          decay: "500ms-2s"
+        connections:
+          - from: "sequencer"
+            to_input: "gate"
+            signal_type: "gate"
+      - step: 6
+        action: "Short delay for body resonance"
+        module_type: "delay"
+        optional: true
+        settings:
+          time: "very short"
+          feedback: "medium"
+        connections:
+          - from: "vca"
+            to_input: "audio_in"
+            signal_type: "audio"
+    mermaid_template: |
+      graph LR
+        SEQ[Sequencer] -->|CV| VCO[VCO]
+        VCO --> VCF[VCF<br/>high res]
+        VCF --> VCA[VCA]
+        SEQ -->|Gate| ENVF[Env Ping<br/>fast]
+        SEQ -->|Gate| ENVA[Env VCA<br/>decay]
+        ENVF -.->|Mod| VCF
+        ENVA -.->|Mod| VCA
+        VCA --> DEL[Short Delay]
+
+substitution_rules:
+  - if_missing: "reverb"
+    alternatives:
+      - type: "delay"
+        note: "Use longer delay times with high feedback to simulate space"
+      - type: "external_pedal"
+        note: "Send output to external reverb pedal/unit"
+  - if_missing: "sequencer"
+    alternatives:
+      - type: "manual_cv"
+        note: "Use manual CV sources or MIDI-to-CV converter"
+      - type: "lfo"
+        note: "Very slow LFO with sample & hold for random sequences"
+  - if_missing: "envelope"
+    alternatives:
+      - type: "function_generator"
+        note: "Many function generators can act as envelopes"
+      - type: "decay_envelope"
+        note: "VCA with decay-only envelope if ADSR not available"
+  - if_missing: "lfo"
+    alternatives:
+      - type: "slow_vco"
+        note: "VCO tuned to sub-audio rates"
+      - type: "function_generator"
+        note: "Function generator in cycling mode"
+  - if_missing: "vca"
+    alternatives:
+      - type: "vcf"
+        note: "Close filter completely, use as crude VCA"
+      - type: "external_mixer"
+        note: "Use external mixer for level control"
