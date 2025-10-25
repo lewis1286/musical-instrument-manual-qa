@@ -78,14 +78,16 @@ if __name__ == "__main__":
         port=8000,
         reload=True,
         reload_excludes=[
-            "chroma_db/*",
-            "*/chroma_db/*",
-            ":memory:/*",
-            "*/:memory:/*",
+            "**/chroma_db/**",
+            "chroma_db/**",
+            "../chroma_db/**",
+            "**/chroma_db/*",
             "*.db",
             "*.sqlite",
             "*.sqlite3",
-            "__pycache__/*",
-            "*/__pycache__/*",
+            "**/__pycache__/**",
+            "**/temp/**",
+            "**/tmp/**",
+            "**/*.tmp",
         ]
     )
